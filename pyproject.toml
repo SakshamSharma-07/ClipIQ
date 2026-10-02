@@ -4,11 +4,25 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
+
 dependencies = [
     "audioop-lts>=0.2.2",
     "langchain-text-splitters>=1.1.2",
     "pydub>=0.25.1",
     "yt-dlp>=2026.8.19",
+    "streamlit",
+    "langchain",
+    "langchain-core",
+    "langchain-groq",
+    "langchain-chroma",
+    "langchain-huggingface",
+    "groq",
+    "openai-whisper",
+    "sentence-transformers",
+    "chromadb",
+    "reportlab",
+    "ffmpeg-python",
+    "python-dotenv",
 ]
 
 [tool.uv.sources]
