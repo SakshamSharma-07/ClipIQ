@@ -1,0 +1,33 @@
+streamlit
+
+# LangChain
+langchain
+langchain-core
+langchain-groq
+langchain-chroma
+langchain-huggingface
+
+# Groq
+groq
+
+# Local Whisper
+openai-whisper
+
+# YouTube audio
+yt-dlp
+
+# Embeddings
+sentence-transformers
+
+# Vector database
+chromadb
+
+# PDF/TXT export
+reportlab
+
+# Audio processing
+pydub
+
+ffmpeg-python
+
+python-dotenv
