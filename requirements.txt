@@ -14,7 +14,8 @@ groq
 openai-whisper
 
 # YouTube audio
-yt-dlp>=2026.09.26
+yt-dlp
+yt-dlp-ejs
 bgutil-ytdlp-pot-provider
 
 # Embeddings

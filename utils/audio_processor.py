@@ -21,34 +21,23 @@ def download_youtube_audio(url: str) -> str:
     "format": "bestaudio/best",
     "outtmpl": output_path,
     "noplaylist": True,
-
     "quiet": False,
     "no_warnings": False,
 
+    "js_runtimes": {
+        "node": "node"
+    },
+
+    "remote_components": ["ejs:github"],
+
     "extractor_args": {
-    "youtube": {
-        "player_client": ["mweb"]
-    },
-    "youtubepot-bgutilscript": {
-        "script_path": "bgutil-ytdlp-pot-provider/server/build/generate_once.js"
-    }
-},
-
-    "http_headers": {
-        "User-Agent": (
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-            "AppleWebKit/605.1.15 (KHTML, like Gecko) "
-            "Version/18.0 Safari/605.1.15"
-        )
-    },
-
-    "postprocessors": [
-        {
-            "key": "FFmpegExtractAudio",
-            "preferredcodec": "wav",
-            "preferredquality": "192",
+        "youtube": {
+            "player_client": ["mweb"]
+        },
+        "youtubepot-bgutilscript": {
+            "server_home": "bgutil-ytdlp-pot-provider/server"
         }
-    ],
+    },
 }
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
