@@ -25,8 +25,10 @@ def download_youtube_audio(url: str) -> str:
     "no_warnings": False,
 
     "js_runtimes": {
-        "node": "node"
-    },
+    "node": {
+        "path": "node"
+    }
+},
 
     "remote_components": ["ejs:github"],
 
