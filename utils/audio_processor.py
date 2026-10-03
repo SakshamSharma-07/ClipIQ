@@ -26,10 +26,13 @@ def download_youtube_audio(url: str) -> str:
     "no_warnings": False,
 
     "extractor_args": {
-        "youtube": {
-            "player_client": ["web_safari"]
-        }
+    "youtube": {
+        "player_client": ["web_safari"]
     },
+    "youtubepot-bgutilscript": {
+        "script_path": "bgutil-ytdlp-pot-provider/server/build/generate_once.js"
+    }
+},
 
     "http_headers": {
         "User-Agent": (
