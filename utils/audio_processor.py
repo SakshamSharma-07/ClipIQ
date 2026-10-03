@@ -18,7 +18,7 @@ def download_youtube_audio(url: str) -> str:
     )
 
     ydl_opts = {
-    "format": "best",
+    "format": "bestaudio/best",
     "outtmpl": output_path,
     "noplaylist": True,
 
@@ -27,7 +27,7 @@ def download_youtube_audio(url: str) -> str:
 
     "extractor_args": {
     "youtube": {
-        "player_client": ["default", "web_safari"]
+        "player_client": ["mweb"]
     },
     "youtubepot-bgutilscript": {
         "script_path": "bgutil-ytdlp-pot-provider/server/build/generate_once.js"
