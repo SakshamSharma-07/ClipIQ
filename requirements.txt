@@ -14,7 +14,7 @@ groq
 openai-whisper
 
 # YouTube audio
-yt-dlp
+yt-dlp>=2026.09.26
 
 # Embeddings
 sentence-transformers
