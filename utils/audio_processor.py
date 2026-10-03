@@ -18,34 +18,35 @@ def download_youtube_audio(url: str) -> str:
     )
 
     ydl_opts = {
-        "format": "bestaudio[protocol*=m3u8]/bestaudio/best",
-        "outtmpl": output_path,
-        "noplaylist": True,
-        "quiet": False,
-        "no_warnings": False,
+    "format": "bestaudio/best",
+    "outtmpl": output_path,
+    "noplaylist": True,
 
-        "extractor_args": {
-            "youtube": {
-                "player_client": ["web_safari"]
-            }
-        },
+    "quiet": False,
+    "no_warnings": False,
 
-        "http_headers": {
-            "User-Agent": (
-                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-                "AppleWebKit/605.1.15 (KHTML, like Gecko) "
-                "Version/18.0 Safari/605.1.15"
-            )
-        },
+    "extractor_args": {
+        "youtube": {
+            "player_client": ["web_safari"]
+        }
+    },
 
-        "postprocessors": [
-            {
-                "key": "FFmpegExtractAudio",
-                "preferredcodec": "wav",
-                "preferredquality": "192",
-            }
-        ],
-    }
+    "http_headers": {
+        "User-Agent": (
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+            "AppleWebKit/605.1.15 (KHTML, like Gecko) "
+            "Version/18.0 Safari/605.1.15"
+        )
+    },
+
+    "postprocessors": [
+        {
+            "key": "FFmpegExtractAudio",
+            "preferredcodec": "wav",
+            "preferredquality": "192",
+        }
+    ],
+}
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=True)
