@@ -34,6 +34,9 @@ from types import SimpleNamespace
 from typing import Any, Iterator, Optional
 from urllib.parse import urlparse
 
+from dotenv import load_dotenv
+load_dotenv()
+
 import streamlit as st
 
 # Make `core/` and `utils/` importable no matter where Streamlit is launched from.
