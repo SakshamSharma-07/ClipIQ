@@ -1,12 +1,50 @@
+import os
+import re
 import yt_dlp
 from pydub import AudioSegment
-import os
+from youtube_transcript_api import YouTubeTranscriptApi
 
-DOWNLOAD_DIR = 'downloades'
-os.makedirs(DOWNLOAD_DIR,exist_ok = True)
+DOWNLOAD_DIR = "downloades"
+os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
-def download_youtube_audio(url :str) ->str:
+
+def extract_video_id(url: str) -> str:
+    patterns = [
+        r"(?:v=)([0-9A-Za-z_-]{11})",
+        r"(?:youtu\.be/)([0-9A-Za-z_-]{11})",
+        r"(?:youtube\.com/shorts/)([0-9A-Za-z_-]{11})",
+        r"(?:youtube\.com/embed/)([0-9A-Za-z_-]{11})",
+    ]
+
+    for pattern in patterns:
+        match = re.search(pattern, url)
+        if match:
+            return match.group(1)
+
+    raise ValueError("Could not extract a valid YouTube video ID.")
+
+
+def get_youtube_transcript(url: str, language: str | None = None) -> str:
+    video_id = extract_video_id(url)
+    api = YouTubeTranscriptApi()
+
+    languages = [language] if language else ["en"]
+
+    try:
+        transcript = api.fetch(video_id, languages=languages)
+    except Exception:
+        transcript = api.fetch(video_id)
+
+    return " ".join(
+        snippet.text.strip()
+        for snippet in transcript
+        if snippet.text.strip()
+    )
+
+
+def download_youtube_audio(url: str) -> str:
     output_path = os.path.join(DOWNLOAD_DIR, "%(title)s.%(ext)s")
+
     ydl_opts = {
         "format": "bestaudio/best",
         "outtmpl": output_path,
@@ -19,37 +57,40 @@ def download_youtube_audio(url :str) ->str:
         ],
         "quiet": True,
     }
+
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=True)
-        filename = ydl.prepare_filename(info).replace(".webm", ".wav").replace(".m4a", ".wav")
+        filename = (
+            ydl.prepare_filename(info)
+            .replace(".webm", ".wav")
+            .replace(".m4a", ".wav")
+        )
+
     return filename
 
 
-
 def convert_to_wav(input_path: str) -> str:
-    """Convert any audio/video file to WAV format using pydub."""
     output_path = os.path.splitext(input_path)[0] + "_converted.wav"
     audio = AudioSegment.from_file(input_path)
-    audio = audio.set_channels(1).set_frame_rate(16000) #16khz
+    audio = audio.set_channels(1).set_frame_rate(16000)
     audio.export(output_path, format="wav")
     return output_path
 
 
-
-def chunk_audio(wav_path : str , chunk_minutes : int = 10) -> list:
+def chunk_audio(wav_path: str, chunk_minutes: int = 10) -> list:
     audio = AudioSegment.from_wav(wav_path)
-    chunk_ms = chunk_minutes * 60 * 1000 
+    chunk_ms = chunk_minutes * 60 * 1000
 
     chunks = []
 
-    for i, start in enumerate(range(0,len(audio),chunk_ms)):
-        chunk = audio[start : start + chunk_ms]
+    for i, start in enumerate(range(0, len(audio), chunk_ms)):
+        chunk = audio[start:start + chunk_ms]
         chunk_path = f"{wav_path}_chunk_{i}.wav"
-        chunk.export(chunk_path , format = "wav")
-
+        chunk.export(chunk_path, format="wav")
         chunks.append(chunk_path)
-    
+
     return chunks
+
 
 def process_input(source: str) -> list:
     if source.startswith("http://") or source.startswith("https://"):
@@ -62,4 +103,5 @@ def process_input(source: str) -> list:
     print("Chunking audio...")
     chunks = chunk_audio(wav_path)
     print(f"Audio ready — {len(chunks)} chunk(s) created.")
+
     return chunks

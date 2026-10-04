@@ -17,6 +17,7 @@ openai-whisper
 yt-dlp
 yt-dlp-ejs
 bgutil-ytdlp-pot-provider
+youtube-transcript-api
 
 # Embeddings
 sentence-transformers

@@ -23,6 +23,7 @@ dependencies = [
     "reportlab",
     "ffmpeg-python",
     "python-dotenv",
+    "youtube-transcript-api>=1.2.4",
 ]
 
 [tool.uv.sources]
