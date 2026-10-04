@@ -37,10 +37,10 @@ from urllib.parse import urlparse
 from dotenv import load_dotenv
 load_dotenv()
 
+import streamlit as st
+
 if "GROQ_API_KEY" in st.secrets:
     os.environ["GROQ_API_KEY"] = st.secrets["GROQ_API_KEY"]
-
-import streamlit as st
 
 # Make `core/` and `utils/` importable no matter where Streamlit is launched from.
 ROOT_DIR = Path(__file__).resolve().parent
