@@ -806,6 +806,53 @@ def _save_upload(job: dict[str, Any]) -> str:
         return tmp.name
 
 
+def _youtube_video_id(url: str) -> str:
+    p = urlparse(url)
+    host = (p.netloc or "").lower().split(":")[0]
+    if host == "youtu.be":
+        return p.path.strip("/").split("/")[0]
+    if host.endswith("youtube.com") or host.endswith("youtube-nocookie.com"):
+        if p.path == "/watch":
+            return (p.query.split("v=", 1)[1].split("&", 1)[0] if "v=" in p.query else "")
+        parts = [x for x in p.path.split("/") if x]
+        if len(parts) >= 2 and parts[0] in {"shorts", "embed", "live"}:
+            return parts[1]
+    return ""
+
+
+def fetch_youtube_transcript(url: str, language: Optional[str] = None) -> str:
+    """Fetch captions directly; deliberately never downloads YouTube media."""
+    try:
+        from youtube_transcript_api import YouTubeTranscriptApi
+    except ImportError as exc:
+        raise UserFacingError(
+            "YouTube Transcript API is not installed",
+            "Run: uv add youtube-transcript-api",
+        ) from exc
+
+    video_id = _youtube_video_id(url)
+    if not video_id:
+        raise UserFacingError("Invalid YouTube URL", "Use a normal YouTube watch, shorts, live, embed, or youtu.be link.")
+
+    try:
+        api = YouTubeTranscriptApi()
+        transcripts = api.list(video_id)
+        if language:
+            selected = transcripts.find_transcript([language])
+        else:
+            selected = next(iter(transcripts), None)
+        if selected is None:
+            raise UserFacingError("No transcript available", "This video has no captions/transcript that can be fetched.")
+        return "\n".join(x.text for x in selected.fetch()).strip()
+    except UserFacingError:
+        raise
+    except Exception as exc:
+        raise UserFacingError(
+            "Could not fetch YouTube transcript",
+            "Make sure the video is public and has captions enabled.",
+        ) from exc
+
+
 def execute_pipeline(backend: SimpleNamespace, job: dict[str, Any], tracker: StageTracker) -> dict[str, Any]:
     """Same call sequence as main.run_pipeline(), split into reportable stages."""
     started = time.perf_counter()
@@ -815,16 +862,22 @@ def execute_pipeline(backend: SimpleNamespace, job: dict[str, Any], tracker: Sta
         if job["kind"] == SOURCE_FILE:
             tmp_path = source = _save_upload(job)
 
-        with tracker.stage("fetch"):
-            chunks = backend.process_input(source, **language_kwargs(backend.process_input, code))
+        if job["kind"] == SOURCE_YOUTUBE:
+            with tracker.stage("fetch"):
+                transcript = fetch_youtube_transcript(source, code)
+            with tracker.stage("transcribe"):
+                transcript = coerce_text(transcript).strip()
+        else:
+            with tracker.stage("fetch"):
+                chunks = backend.process_input(source, **language_kwargs(backend.process_input, code))
+            with tracker.stage("transcribe"):
+                transcript = coerce_text(backend.transcribe_all(chunks, **language_kwargs(backend.transcribe_all, code))).strip()
 
-        with tracker.stage("transcribe"):
-            transcript = coerce_text(backend.transcribe_all(chunks, **language_kwargs(backend.transcribe_all, code)))
-            if not transcript.strip():
-                raise UserFacingError(
-                    "No speech detected",
-                    "The transcription came back empty. Try a source with clear spoken audio.",
-                )
+        if not transcript:
+            raise UserFacingError(
+                "No speech detected",
+                "The transcription came back empty. Try a source with clear spoken audio.",
+            )
 
         with tracker.stage("summary"):
             title = coerce_text(backend.generate_title(transcript)).strip().strip('"').strip()
@@ -850,7 +903,7 @@ def execute_pipeline(backend: SimpleNamespace, job: dict[str, Any], tracker: Sta
                 "source_label": job["filename"] if job["kind"] == SOURCE_FILE else job["source"],
                 "source_kind": job["kind"],
                 "language": job["language"],
-                "language_applied": bool(
+                "language_applied": bool(code) if job["kind"] == SOURCE_YOUTUBE else bool(
                     language_kwargs(backend.transcribe_all, code) or language_kwargs(backend.process_input, code)
                 ),
                 "words": len(transcript.split()),
