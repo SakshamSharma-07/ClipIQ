@@ -6,6 +6,10 @@ Whether the source is a YouTube video or a local audio/video file, ClipIQ analyz
 
 ---
 
+## Live Demo
+
+Try ClipIQ online: [https://clipiq-fti2tyzwbm47cwysdykvlh.streamlit.app/](https://clipiq-fti2tyzwbm47cwysdykvlh.streamlit.app/)
+
 ## Overview
 
 This project combines several modern AI and data tools to create a practical workflow:
