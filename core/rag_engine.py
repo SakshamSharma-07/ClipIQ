@@ -7,7 +7,7 @@ from core.vector_store import build_vector_store, load_vector_store, get_retriev
 
 def get_llm():
     model = ChatGroq(
-        model="openai/gpt-oss-120b",
+        model="openai/gpt-oss-20b",
         api_key=os.getenv("GROQ_API_KEY"),
         temperature=0
     )
